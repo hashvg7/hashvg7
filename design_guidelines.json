@@ -1,0 +1,131 @@
+{
+  "identity": {
+    "persona": "E1",
+    "philosophy": "Fusion over Imitation. Emotion First. Content is King.",
+    "anti_patterns": [
+      "Purple/Teal gradients",
+      "Inter font everywhere",
+      "Centered layouts",
+      "Generic 'Bootstrap' columns"
+    ]
+  },
+  "typography": {
+    "primary_font": "IBM Plex Sans",
+    "secondary_font": "Work Sans",
+    "usage": {
+      "headings": "Work Sans, font-weight: 600/700, tracking-tight",
+      "body": "IBM Plex Sans, font-weight: 400/500, leading-relaxed",
+      "mono": "JetBrains Mono (for data/code)"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tighter",
+      "h2": "text-3xl font-semibold tracking-tight",
+      "h3": "text-2xl font-medium",
+      "body": "text-base text-slate-600",
+      "caption": "text-sm text-slate-500 uppercase tracking-wider"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": "#064E3B",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#F1F5F9",
+      "secondary_foreground": "#0F172A",
+      "accent": "#D9F99D",
+      "accent_foreground": "#064E3B",
+      "background": "#FFFFFF",
+      "foreground": "#0A0A0A",
+      "muted": "#F8FAFC",
+      "muted_foreground": "#64748B",
+      "border": "#E2E8F0",
+      "destructive": "#EF4444"
+    },
+    "chart_colors": [
+      "#064E3B",
+      "#10B981",
+      "#D9F99D",
+      "#64748B",
+      "#0F172A"
+    ],
+    "theme": "light",
+    "rules": "High contrast. No gradients on text. Use solid blocks of color."
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "element_gap": "gap-6",
+      "section_spacing": "py-12 md:py-20"
+    },
+    "containers": {
+      "card": "bg-white border border-slate-200 rounded-md shadow-sm hover:shadow-md transition-all duration-200",
+      "dashboard_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-6 py-2.5 font-medium transition-all shadow-sm",
+      "secondary": "bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 rounded-md px-6 py-2.5 font-medium transition-all",
+      "ghost": "hover:bg-slate-100 text-slate-700 rounded-md px-4 py-2"
+    },
+    "inputs": {
+      "default": "h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    "cards": {
+      "style": "rounded-lg border border-slate-200 bg-white text-slate-950 shadow-sm"
+    },
+    "navigation": {
+      "sidebar": "w-64 border-r border-slate-200 bg-slate-50/50 h-screen sticky top-0",
+      "link": "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-colors"
+    }
+  },
+  "images": {
+    "login_background": "https://images.pexels.com/photos/18435276/pexels-photo-18435276.jpeg",
+    "avatars": [
+      "https://images.pexels.com/photos/33871730/pexels-photo-33871730.jpeg",
+      "https://images.pexels.com/photos/34129721/pexels-photo-34129721.jpeg"
+    ],
+    "placeholders": {
+      "logo": "https://via.placeholder.com/150x50?text=FINANCE+LOGO"
+    }
+  },
+  "functionality_map": {
+    "pages": [
+      {
+        "name": "Login",
+        "path": "/login",
+        "features": ["Email/Password", "Google OAuth", "Split Layout (Image/Form)"]
+      },
+      {
+        "name": "Dashboard",
+        "path": "/dashboard",
+        "features": ["MRR Overview", "Recent Activity", "Quick Actions", "Revenue Chart"]
+      },
+      {
+        "name": "Customers",
+        "path": "/customers",
+        "features": ["List View", "Permission Toggles", "Add/Edit Customer"]
+      },
+      {
+        "name": "Finance",
+        "path": "/finance",
+        "features": ["Invoices", "Expenses", "Reconciliation"]
+      },
+      {
+        "name": "Settings",
+        "path": "/settings",
+        "features": ["Rate Management", "User Roles", "System Config"]
+      }
+    ]
+  },
+  "universal_guidelines": [
+    "Do not use 'Inter' font.",
+    "Use 2-3x more spacing than typical designs.",
+    "Every interaction needs micro-animations.",
+    "Use 'sonner' for toasts.",
+    "All interactive elements MUST include 'data-testid'.",
+    "Do not use gradients for text.",
+    "Use 'recharts' for charts with custom colors."
+  ],
+  "instructions_to_main_agent": "Follow the E1 persona. Build a high-contrast, professional finance dashboard. Use the provided color palette (Emerald/Lime) to create a unique look. Ensure the 'Customer Permission Toggle' feature is prominent in the Customer Management section."
+}
