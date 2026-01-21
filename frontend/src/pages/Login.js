@@ -103,6 +103,24 @@ function Login() {
               </div>
             )}
 
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Role</label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full h-11 rounded-md border border-slate-200 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-transparent transition-all"
+                  data-testid="role-select"
+                >
+                  <option value="customer">Customer</option>
+                  <option value="finance_team">Finance Team</option>
+                  <option value="accountant">Accountant</option>
+                  <option value="sales">Sales</option>
+                  <option value="pm">Project Manager</option>
+                </select>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Email</label>
               <div className="relative">
