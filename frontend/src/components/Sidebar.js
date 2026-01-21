@@ -40,6 +40,7 @@ function Sidebar({ user }) {
     { path: "/customers", icon: Users, label: "Customers", roles: ["admin", "finance_team", "sales"] },
     { path: "/subscriptions", icon: TrendingUp, label: "Subscriptions", roles: ["admin", "customer", "finance_team", "sales"] },
     { path: "/invoices", icon: FileText, label: "Invoices", roles: ["admin", "customer", "finance_team", "accountant"] },
+    { path: "/receivables", icon: Wallet, label: "Receivables", roles: ["admin", "finance_team", "accountant"] },
     { path: "/expenses", icon: Receipt, label: "Expenses", roles: ["admin", "finance_team", "accountant"] },
     { path: "/rate-management", icon: DollarSign, label: "Rate Management", roles: ["admin", "finance_team"] },
     { path: "/reports", icon: BarChart3, label: "Reports", roles: ["admin", "finance_team", "accountant", "pm"] },
