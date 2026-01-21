@@ -11,7 +11,8 @@ import {
   LogOut,
   DollarSign,
   BarChart3,
-  Building2
+  Building2,
+  Wallet
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
