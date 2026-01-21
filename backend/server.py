@@ -209,18 +209,22 @@ async def register(user_data: UserCreate):
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     hashed_pw = hash_password(user_data.password)
     
+    # Check if this is the first user - make them admin
+    user_count = await db.users.count_documents({})
+    role = "admin" if user_count == 0 else user_data.role
+    
     user_doc = {
         "user_id": user_id,
         "email": user_data.email,
         "name": user_data.name,
-        "role": user_data.role,
+        "role": role,
         "password_hash": hashed_pw,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(user_doc)
     
-    return {"message": "User registered successfully", "user_id": user_id}
+    return {"message": "User registered successfully", "user_id": user_id, "role": role}
 
 @api_router.post("/auth/login")
 async def login(user_data: UserLogin, response: Response):
