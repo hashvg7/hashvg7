@@ -21,7 +21,7 @@ function Login() {
 
     try {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";
-      const body = isLogin ? { email, password } : { email, password, name, role: "customer" };
+      const body = isLogin ? { email, password } : { email, password, name, role };
 
       const response = await fetch(`${API}${endpoint}`, {
         method: "POST",
