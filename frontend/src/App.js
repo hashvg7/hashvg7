@@ -10,6 +10,7 @@ import Invoices from "./pages/Invoices";
 import Expenses from "./pages/Expenses";
 import RateManagement from "./pages/RateManagement";
 import Reports from "./pages/Reports";
+import Receivables from "./pages/Receivables";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
