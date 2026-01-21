@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --primary: #064E3B;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F1F5F9;
+    --secondary-foreground: #0F172A;
+    --accent: #D9F99D;
+    --accent-foreground: #064E3B;
+    --background: #FFFFFF;
+    --foreground: #0A0A0A;
+    --muted: #F8FAFC;
+    --muted-foreground: #64748B;
+    --border: #E2E8F0;
+    --destructive: #EF4444;
+  }
+}
+
 body {
     margin: 0;
     font-family:
