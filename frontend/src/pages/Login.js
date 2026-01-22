@@ -30,11 +30,12 @@ function Login() {
         body: JSON.stringify(body)
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.detail || "Authentication failed");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Authentication failed");
       }
+
+      const data = await response.json();
 
       if (isLogin) {
         toast.success("Login successful!");
