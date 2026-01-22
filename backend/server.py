@@ -882,3 +882,158 @@ async def get_available_services(request: Request):
         "bundles": BUNDLES
     }
 
+
+# =============== RECEIVABLES & PAYMENT ROUTES ===============
+
+@api_router.get("/receivables")
+async def get_receivables(request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team", "accountant"])
+    
+    pending_invoices = await db.invoices.find(
+        {"status": {"$in": ["pending", "overdue"]}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    receivables_by_customer = {}
+    for invoice in pending_invoices:
+        customer_id = invoice["customer_id"]
+        if customer_id not in receivables_by_customer:
+            customer = await db.customers.find_one(
+                {"customer_id": customer_id},
+                {"_id": 0}
+            )
+            if customer:
+                receivables_by_customer[customer_id] = {
+                    "customer": customer,
+                    "invoices": [],
+                    "total_amount": 0
+                }
+        
+        if customer_id in receivables_by_customer:
+            if isinstance(invoice["created_at"], str):
+                invoice["created_at"] = datetime.fromisoformat(invoice["created_at"])
+            if isinstance(invoice["due_date"], str):
+                invoice["due_date"] = datetime.fromisoformat(invoice["due_date"])
+            
+            receivables_by_customer[customer_id]["invoices"].append(invoice)
+            receivables_by_customer[customer_id]["total_amount"] += invoice["amount"]
+    
+    return list(receivables_by_customer.values())
+
+@api_router.post("/receivables/create-payment-link")
+async def create_payment_link(invoice_id: str, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    invoice = await db.invoices.find_one({"invoice_id": invoice_id}, {"_id": 0})
+    
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    customer = await db.customers.find_one(
+        {"customer_id": invoice["customer_id"]},
+        {"_id": 0}
+    )
+    
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    try:
+        import razorpay
+        razorpay_key = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_key')
+        razorpay_secret = os.environ.get('RAZORPAY_KEY_SECRET', 'secret')
+        
+        client = razorpay.Client(auth=(razorpay_key, razorpay_secret))
+        
+        amount_in_paise = int(invoice["amount"] * 100)
+        payment_link = client.payment_link.create({
+            "amount": amount_in_paise,
+            "currency": "INR",
+            "description": f"Payment for Invoice {invoice['invoice_id']}",
+            "customer": {
+                "name": customer["name"],
+                "email": customer["email"]
+            }
+        })
+        
+        await db.invoices.update_one(
+            {"invoice_id": invoice_id},
+            {"$set": {
+                "payment_link_id": payment_link["id"],
+                "payment_link_url": payment_link["short_url"],
+                "payment_link_created_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        return {
+            "payment_link_id": payment_link["id"],
+            "payment_link_url": payment_link["short_url"],
+            "amount": invoice["amount"],
+            "invoice_id": invoice_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Error creating Razorpay payment link: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create payment link: {str(e)}")
+
+@api_router.post("/receivables/send-payment-email")
+async def send_payment_email(invoice_id: str, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    invoice = await db.invoices.find_one({"invoice_id": invoice_id}, {"_id": 0})
+    
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    if not invoice.get("payment_link_url"):
+        raise HTTPException(status_code=400, detail="Payment link not created yet")
+    
+    return {"status": "success", "message": "Email feature - integrate AWS SES"}
+
+@api_router.post("/receivables/mark-paid")
+async def mark_invoice_paid(invoice_id: str, payment_id: Optional[str] = None, request: Request = None):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    result = await db.invoices.update_one(
+        {"invoice_id": invoice_id},
+        {"$set": {
+            "status": "paid",
+            "payment_received_at": datetime.now(timezone.utc).isoformat(),
+            "razorpay_payment_id": payment_id
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    return {
+        "status": "success",
+        "message": "Invoice marked as paid",
+        "invoice_id": invoice_id,
+        "payment_id": payment_id
+    }
+
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
+
