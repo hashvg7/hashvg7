@@ -70,6 +70,10 @@ class CustomerCreate(BaseModel):
     phone: Optional[str] = None
     company: Optional[str] = None
     permissions: Optional[Dict[str, bool]] = None
+    rate_card: Optional[Dict[str, float]] = None  # Service rates
+    bundles: Optional[List[str]] = None  # Subscribed bundles
+    minimum_balance: Optional[float] = 0
+    account_status: Optional[str] = \"active\"  # active, suspended, shutdown
 
 class CustomerUpdate(BaseModel):
     name: Optional[str] = None
