@@ -593,3 +593,292 @@ async def create_rate_tier(tier_data: RateTierCreate, request: Request):
 
 # =============== USAGE TRACKING ROUTES ===============
 
+
+# =============== USAGE TRACKING ROUTES ===============
+
+class UsageLog(BaseModel):
+    log_id: str
+    customer_id: str
+    service: str
+    count: int
+    year: int
+    month: int
+    logged_at: datetime
+
+class UsageLogCreate(BaseModel):
+    customer_id: str
+    service: str
+    count: int
+    year: Optional[int] = None
+    month: Optional[int] = None
+
+@api_router.post("/usage-logs", response_model=UsageLog)
+async def log_usage(usage_data: UsageLogCreate, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    now = datetime.now(timezone.utc)
+    log_id = f"log_{uuid.uuid4().hex[:12]}"
+    
+    log_doc = {
+        "log_id": log_id,
+        "customer_id": usage_data.customer_id,
+        "service": usage_data.service,
+        "count": usage_data.count,
+        "year": usage_data.year or now.year,
+        "month": usage_data.month or now.month,
+        "logged_at": now.isoformat()
+    }
+    
+    await db.usage_logs.insert_one(log_doc)
+    log_doc["logged_at"] = now
+    
+    return UsageLog(**log_doc)
+
+@api_router.get("/usage-logs/{customer_id}")
+async def get_usage_logs(customer_id: str, year: int, month: int, request: Request):
+    user = require_auth(await get_current_user(request))
+    
+    logs = await db.usage_logs.find(
+        {"customer_id": customer_id, "year": year, "month": month},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    return logs
+
+# =============== INVOICE GENERATION ROUTES ===============
+
+@api_router.post("/invoices/generate-monthly")
+async def generate_monthly_invoice(
+    customer_id: str,
+    year: int,
+    month: int,
+    request: Request
+):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    existing = await db.invoices.find_one({
+        "customer_id": customer_id,
+        "invoice_period": f"{year}-{month:02d}"
+    })
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Invoice already exists for this period")
+    
+    calculator = InvoiceCalculator(db)
+    invoice_data = await calculator.calculate_monthly_invoice(customer_id, year, month)
+    
+    customer = await db.customers.find_one({"customer_id": customer_id}, {"_id": 0})
+    bundles = customer.get("bundles", [])
+    
+    roi_analysis = calculator.calculate_roi_by_product(invoice_data, bundles)
+    
+    invoice_id = f"inv_{uuid.uuid4().hex[:12]}"
+    invoice_doc = {
+        "invoice_id": invoice_id,
+        "customer_id": customer_id,
+        "amount": invoice_data["total"],
+        "status": "pending",
+        "items": invoice_data["items"],
+        "subtotal": invoice_data["subtotal"],
+        "tax_rate": invoice_data["tax_rate"],
+        "tax_amount": invoice_data["tax_amount"],
+        "invoice_period": invoice_data["invoice_period"],
+        "due_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "roi_breakdown": invoice_data["roi_breakdown"],
+        "roi_analysis": roi_analysis,
+        "usage_data": invoice_data["usage_data"],
+        "paid_amount": 0,
+        "payment_history": []
+    }
+    
+    await db.invoices.insert_one(invoice_doc)
+    
+    return {"message": "Invoice generated successfully", "invoice_id": invoice_id, "invoice": invoice_doc}
+
+# =============== PAYMENT MANAGEMENT ROUTES ===============
+
+class PaymentRecord(BaseModel):
+    amount: float
+    payment_method: str
+    payment_reference: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.post("/invoices/{invoice_id}/record-payment")
+async def record_payment(
+    invoice_id: str,
+    payment: PaymentRecord,
+    request: Request
+):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    invoice = await db.invoices.find_one({"invoice_id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    current_paid = invoice.get("paid_amount", 0)
+    new_paid_amount = current_paid + payment.amount
+    
+    payment_history = invoice.get("payment_history", [])
+    payment_history.append({
+        "amount": payment.amount,
+        "payment_method": payment.payment_method,
+        "payment_reference": payment.payment_reference,
+        "notes": payment.notes,
+        "payment_date": datetime.now(timezone.utc).isoformat(),
+        "recorded_by": user.user_id
+    })
+    
+    total_amount = invoice["amount"]
+    if new_paid_amount >= total_amount:
+        new_status = "paid"
+    elif new_paid_amount > 0:
+        new_status = "partially_paid"
+    else:
+        new_status = "pending"
+    
+    await db.invoices.update_one(
+        {"invoice_id": invoice_id},
+        {"$set": {
+            "paid_amount": new_paid_amount,
+            "payment_history": payment_history,
+            "status": new_status,
+            "last_payment_date": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    if new_status == "paid":
+        await db.customers.update_one(
+            {"customer_id": invoice["customer_id"]},
+            {"$set": {"account_status": "active"}}
+        )
+    
+    return {
+        "message": "Payment recorded successfully",
+        "paid_amount": new_paid_amount,
+        "remaining_amount": max(0, total_amount - new_paid_amount),
+        "status": new_status
+    }
+
+# =============== ACCOUNT MANAGEMENT ROUTES ===============
+
+@api_router.post("/customers/{customer_id}/suspend-account")
+async def suspend_account(customer_id: str, reason: str, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin"])
+    
+    result = await db.customers.update_one(
+        {"customer_id": customer_id},
+        {"$set": {
+            "account_status": "suspended",
+            "suspension_reason": reason,
+            "suspended_at": datetime.now(timezone.utc).isoformat(),
+            "suspended_by": user.user_id
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    return {"message": "Account suspended successfully"}
+
+@api_router.post("/customers/{customer_id}/shutdown-account")
+async def shutdown_account(customer_id: str, reason: str, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin"])
+    
+    result = await db.customers.update_one(
+        {"customer_id": customer_id},
+        {"$set": {
+            "account_status": "shutdown",
+            "shutdown_reason": reason,
+            "shutdown_at": datetime.now(timezone.utc).isoformat(),
+            "shutdown_by": user.user_id
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    return {"message": "Account shutdown successfully"}
+
+@api_router.post("/customers/{customer_id}/reactivate-account")
+async def reactivate_account(customer_id: str, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin"])
+    
+    result = await db.customers.update_one(
+        {"customer_id": customer_id},
+        {"$set": {
+            "account_status": "active",
+            "reactivated_at": datetime.now(timezone.utc).isoformat(),
+            "reactivated_by": user.user_id
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    return {"message": "Account reactivated successfully"}
+
+# =============== ROI CALCULATION ROUTES ===============
+
+@api_router.get("/analytics/roi-by-product")
+async def get_roi_by_product(
+    customer_id: Optional[str] = None,
+    year: Optional[int] = None,
+    month: Optional[int] = None,
+    request: Request = None
+):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team", "pm"])
+    
+    query = {}
+    if customer_id:
+        query["customer_id"] = customer_id
+    if year and month:
+        query["invoice_period"] = f"{year}-{month:02d}"
+    
+    invoices = await db.invoices.find(query, {"_id": 0}).to_list(1000)
+    
+    product_roi = {}
+    
+    for invoice in invoices:
+        roi_analysis = invoice.get("roi_analysis", {})
+        
+        for product, data in roi_analysis.items():
+            if product not in product_roi:
+                product_roi[product] = {
+                    "total_revenue": 0,
+                    "total_usage": 0,
+                    "weighted_roi": 0,
+                    "invoice_count": 0
+                }
+            
+            product_roi[product]["total_revenue"] += data.get("revenue", 0)
+            product_roi[product]["total_usage"] += data.get("usage", 0)
+            product_roi[product]["weighted_roi"] += data.get("weighted_roi_contribution", 0)
+            product_roi[product]["invoice_count"] += 1
+    
+    return {
+        "product_roi": product_roi,
+        "filters": {
+            "customer_id": customer_id,
+            "year": year,
+            "month": month
+        }
+    }
+
+@api_router.get("/services/available")
+async def get_available_services(request: Request):
+    user = require_auth(await get_current_user(request))
+    
+    return {
+        "variable_services": VARIABLE_SERVICES,
+        "fixed_services": FIXED_SERVICES,
+        "bundles": BUNDLES
+    }
+
