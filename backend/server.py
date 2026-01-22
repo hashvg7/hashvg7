@@ -387,6 +387,10 @@ async def create_customer(customer_data: CustomerCreate, request: Request):
             "view_dashboard": True,
             "view_analytics": False
         },
+        "rate_card": customer_data.rate_card or {},
+        "bundles": customer_data.bundles or [],
+        "minimum_balance": customer_data.minimum_balance or 0,
+        "account_status": "active",
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
