@@ -30,22 +30,32 @@ function Login() {
         body: JSON.stringify(body)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Authentication failed");
+      // Read response once
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("JSON parse error:", jsonError);
+        throw new Error("Invalid response from server");
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || "Authentication failed");
+      }
 
       if (isLogin) {
         toast.success("Login successful!");
-        navigate("/dashboard", { state: { user: data.user } });
+        navigate("/dashboard", { state: { user: data.user }, replace: true });
       } else {
         toast.success("Registration successful! Please login.");
         setIsLogin(true);
+        setEmail("");
+        setPassword("");
+        setName("");
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Login error:", error);
+      toast.error(error.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
