@@ -40,6 +40,8 @@ function Sidebar({ user }) {
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["admin", "customer", "finance_team", "accountant", "sales", "pm"] },
     { path: "/customers", icon: Users, label: "Customers", roles: ["admin", "finance_team", "sales"] },
+    { path: "/usage-tracking", icon: Activity, label: "Usage Tracking", roles: ["admin", "finance_team"] },
+    { path: "/invoice-management", icon: FileCheck, label: "Invoice Management", roles: ["admin", "finance_team", "accountant"] },
     { path: "/subscriptions", icon: TrendingUp, label: "Subscriptions", roles: ["admin", "customer", "finance_team", "sales"] },
     { path: "/invoices", icon: FileText, label: "Invoices", roles: ["admin", "customer", "finance_team", "accountant"] },
     { path: "/receivables", icon: Wallet, label: "Receivables", roles: ["admin", "finance_team", "accountant"] },
