@@ -12,7 +12,9 @@ import {
   DollarSign,
   BarChart3,
   Building2,
-  Wallet
+  Wallet,
+  Activity,
+  FileCheck
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
