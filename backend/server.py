@@ -1037,3 +1037,64 @@ logger = logging.getLogger(__name__)
 async def shutdown_db_client():
     client.close()
 
+
+# =============== AUTOMATED REMINDERS ===============
+
+@api_router.get("/reminders/check-pending-invoices")
+async def check_pending_invoices(request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    now = datetime.now(timezone.utc)
+    
+    overdue_invoices = await db.invoices.find({
+        "status": {"$in": ["pending", "partially_paid"]},
+        "due_date": {"$lt": now.isoformat()}
+    }, {"_id": 0}).to_list(1000)
+    
+    actions_needed = []
+    
+    for invoice in overdue_invoices:
+        customer = await db.customers.find_one(
+            {"customer_id": invoice["customer_id"]},
+            {"_id": 0}
+        )
+        
+        if not customer:
+            continue
+        
+        due_date = datetime.fromisoformat(invoice["due_date"])
+        days_overdue = (now - due_date).days
+        
+        remaining_amount = invoice["amount"] - invoice.get("paid_amount", 0)
+        
+        action = {
+            "customer_id": invoice["customer_id"],
+            "customer_name": customer["name"],
+            "invoice_id": invoice["invoice_id"],
+            "amount_due": remaining_amount,
+            "days_overdue": days_overdue,
+            "account_status": customer.get("account_status", "active")
+        }
+        
+        if days_overdue >= 30 and customer.get("account_status") != "shutdown":
+            action["recommended_action"] = "shutdown_account"
+            action["reason"] = f"Payment overdue by {days_overdue} days"
+        elif days_overdue >= 15 and customer.get("account_status") == "active":
+            action["recommended_action"] = "suspend_account"
+            action["reason"] = f"Payment overdue by {days_overdue} days"
+        elif days_overdue >= 7:
+            action["recommended_action"] = "send_final_reminder"
+        elif days_overdue >= 3:
+            action["recommended_action"] = "send_reminder"
+        else:
+            action["recommended_action"] = "monitor"
+        
+        actions_needed.append(action)
+    
+    return {
+        "total_overdue": len(overdue_invoices),
+        "actions_needed": actions_needed,
+        "checked_at": now.isoformat()
+    }
+
