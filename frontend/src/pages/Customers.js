@@ -194,8 +194,15 @@ function Customers({ user }) {
                     <td className="px-6 py-4 text-sm text-slate-600" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{customer.email}</td>
                     <td className="px-6 py-4 text-sm text-slate-600" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{customer.company || '-'}</td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {Object.entries(customer.permissions).filter(([k, v]) => v).map(([key]) => (
+                      <button
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setShowDetailsModal(true);
+                        }}
+                        className="flex flex-wrap gap-1 hover:opacity-80 transition-opacity cursor-pointer text-left"
+                        data-testid={`view-permissions-${customer.customer_id}`}
+                      >
+                        {Object.entries(customer.permissions).filter(([k, v]) => v).slice(0, 3).map(([key]) => (
                           <span
                             key={key}
                             className="px-2 py-1 text-xs rounded-md"
@@ -204,7 +211,12 @@ function Customers({ user }) {
                             {permissionLabels[key]}
                           </span>
                         ))}
-                      </div>
+                        {Object.entries(customer.permissions).filter(([k, v]) => v).length > 3 && (
+                          <span className="px-2 py-1 text-xs rounded-md bg-slate-100 text-slate-600" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>
+                            +{Object.entries(customer.permissions).filter(([k, v]) => v).length - 3} more
+                          </span>
+                        )}
+                      </button>
                     </td>
                     {(user?.role === "admin" || user?.role === "sales") && (
                       <td className="px-6 py-4 text-right">
