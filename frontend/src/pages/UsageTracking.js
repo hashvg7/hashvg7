@@ -42,17 +42,19 @@ function UsageTracking({ user }) {
 
   useEffect(() => {
     fetchCustomers();
-    fetchExcessUsage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (selectedCustomer) {
       fetchUsageLogs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCustomer, formData.year, formData.month]);
 
   useEffect(() => {
     fetchExcessUsage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.year, formData.month]);
 
   const fetchCustomers = async () => {
