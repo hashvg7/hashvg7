@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
-import { Plus, Activity, TrendingUp } from "lucide-react";
+import { Plus, Activity, TrendingUp, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -30,6 +30,8 @@ function UsageTracking({ user }) {
   const [usageLogs, setUsageLogs] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [excessUsageData, setExcessUsageData] = useState(null);
+  const [loadingExcess, setLoadingExcess] = useState(false);
   const [formData, setFormData] = useState({
     customer_id: "",
     service: "",
