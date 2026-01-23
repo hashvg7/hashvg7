@@ -42,6 +42,7 @@ function UsageTracking({ user }) {
 
   useEffect(() => {
     fetchCustomers();
+    fetchExcessUsage();
   }, []);
 
   useEffect(() => {
@@ -49,6 +50,10 @@ function UsageTracking({ user }) {
       fetchUsageLogs();
     }
   }, [selectedCustomer, formData.year, formData.month]);
+
+  useEffect(() => {
+    fetchExcessUsage();
+  }, [formData.year, formData.month]);
 
   const fetchCustomers = async () => {
     try {
@@ -59,6 +64,24 @@ function UsageTracking({ user }) {
       toast.error("Failed to load customers");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchExcessUsage = async () => {
+    setLoadingExcess(true);
+    try {
+      const response = await fetch(
+        `${API}/usage-logs/excess-usage?year=${formData.year}&month=${formData.month}`,
+        { credentials: "include" }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setExcessUsageData(data);
+      }
+    } catch (error) {
+      console.error("Failed to load excess usage data:", error);
+    } finally {
+      setLoadingExcess(false);
     }
   };
 
