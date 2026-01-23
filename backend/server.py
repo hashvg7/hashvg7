@@ -1098,3 +1098,52 @@ async def check_pending_invoices(request: Request):
         "checked_at": now.isoformat()
     }
 
+
+# =============== ANALYTICS ROUTES ===============
+
+@api_router.get("/analytics/overview")
+async def get_analytics_overview(request: Request):
+    user = require_auth(await get_current_user(request))
+    
+    total_customers = await db.customers.count_documents({})
+    total_subscriptions = await db.subscriptions.count_documents({"status": "active"})
+    
+    subscriptions = await db.subscriptions.find({"status": "active"}, {"_id": 0}).to_list(1000)
+    total_mrr = sum(sub.get("mrr", 0) for sub in subscriptions)
+    
+    invoices = await db.invoices.find({}, {"_id": 0}).to_list(1000)
+    total_revenue = sum(inv.get("amount", 0) for inv in invoices if inv.get("status") == "paid")
+    pending_revenue = sum(inv.get("amount", 0) for inv in invoices if inv.get("status") == "pending")
+    
+    expenses = await db.expenses.find({}, {"_id": 0}).to_list(1000)
+    total_expenses = sum(exp.get("amount", 0) for exp in expenses)
+    
+    return {
+        "total_customers": total_customers,
+        "total_subscriptions": total_subscriptions,
+        "total_mrr": total_mrr,
+        "total_revenue": total_revenue,
+        "pending_revenue": pending_revenue,
+        "total_expenses": total_expenses,
+        "net_profit": total_revenue - total_expenses
+    }
+
+@api_router.get("/analytics/revenue-chart")
+async def get_revenue_chart(request: Request):
+    user = require_auth(await get_current_user(request))
+    
+    invoices = await db.invoices.find({"status": "paid"}, {"_id": 0}).to_list(1000)
+    
+    revenue_by_month = {}
+    for invoice in invoices:
+        created_at = invoice.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at)
+        
+        month_key = created_at.strftime("%Y-%m")
+        revenue_by_month[month_key] = revenue_by_month.get(month_key, 0) + invoice.get("amount", 0)
+    
+    chart_data = [{"month": k, "revenue": v} for k, v in sorted(revenue_by_month.items())]
+    
+    return chart_data
+
