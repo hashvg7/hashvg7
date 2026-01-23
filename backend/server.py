@@ -1124,6 +1124,61 @@ async def check_pending_invoices(request: Request):
         "checked_at": now.isoformat()
     }
 
+@api_router.get("/usage-logs/excess-usage")
+async def get_excess_usage(year: int, month: int, request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    customers = await db.customers.find({}, {"_id": 0}).to_list(1000)
+    excess_customers = []
+    
+    for customer in customers:
+        rate_card = customer.get("rate_card", {})
+        if not rate_card:
+            continue
+        
+        usage_logs = await db.usage_logs.find({
+            "customer_id": customer["customer_id"],
+            "year": year,
+            "month": month
+        }, {"_id": 0}).to_list(1000)
+        
+        usage_by_service = {}
+        for log in usage_logs:
+            service = log["service"]
+            usage_by_service[service] = usage_by_service.get(service, 0) + log["count"]
+        
+        exceeded_services = []
+        for service, usage_count in usage_by_service.items():
+            if service in rate_card:
+                rate = rate_card[service]
+                if rate > 0:
+                    expected_limit = 1000
+                    if usage_count > expected_limit:
+                        exceeded_services.append({
+                            "service": service,
+                            "usage": usage_count,
+                            "expected_limit": expected_limit,
+                            "excess": usage_count - expected_limit,
+                            "excess_percentage": ((usage_count - expected_limit) / expected_limit * 100)
+                        })
+        
+        if exceeded_services:
+            excess_customers.append({
+                "customer_id": customer["customer_id"],
+                "customer_name": customer["name"],
+                "email": customer["email"],
+                "exceeded_services": exceeded_services,
+                "total_excess_services": len(exceeded_services)
+            })
+    
+    return {
+        "year": year,
+        "month": month,
+        "total_customers_exceeding": len(excess_customers),
+        "customers": excess_customers
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
