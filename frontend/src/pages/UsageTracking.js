@@ -206,6 +206,81 @@ function UsageTracking({ user }) {
             </div>
           </div>
 
+          {/* Excess Usage Alert Section */}
+          <div className="mb-8 rounded-lg border border-amber-200 bg-amber-50 p-6 shadow-sm" data-testid="excess-usage-section">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle size={24} className="text-amber-600" />
+              <h3 className="text-xl font-semibold" style={{ fontFamily: 'Work Sans, sans-serif', color: '#92400E' }}>
+                Customers Exceeding Usage Limits
+              </h3>
+              {excessUsageData && (
+                <span className="ml-auto px-3 py-1 rounded-full text-sm font-medium bg-amber-200 text-amber-800">
+                  {excessUsageData.total_customers_exceeding} customer{excessUsageData.total_customers_exceeding !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            
+            {loadingExcess ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+              </div>
+            ) : excessUsageData && excessUsageData.customers.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-amber-200">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-amber-800" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Customer</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-amber-800" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Email</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-amber-800" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Services Exceeded</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-amber-800" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {excessUsageData.customers.map((customer) => (
+                      <tr key={customer.customer_id} className="border-b border-amber-100 hover:bg-amber-100/50 transition-colors">
+                        <td className="px-4 py-3 text-sm font-medium" style={{ fontFamily: 'IBM Plex Sans, sans-serif', color: '#064E3B' }}>
+                          {customer.customer_name}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-600" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>
+                          {customer.email}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                            {customer.total_excess_services} service{customer.total_excess_services !== 1 ? 's' : ''}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="space-y-1">
+                            {customer.exceeded_services.map((svc, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-xs">
+                                <span className="font-medium text-slate-700">
+                                  {SERVICES.variable.find(s => s.key === svc.service)?.name || svc.service}:
+                                </span>
+                                <span className="text-red-600 font-semibold">
+                                  {svc.usage.toLocaleString()} / {svc.expected_limit.toLocaleString()}
+                                </span>
+                                <span className="text-amber-700">
+                                  (+{svc.excess_percentage.toFixed(1)}%)
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Activity size={32} className="mx-auto mb-2 text-amber-400" />
+                <p className="text-amber-700" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>
+                  No customers exceeding usage limits for {new Date(2000, formData.month - 1).toLocaleString('default', { month: 'long' })} {formData.year}
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Usage Summary */}
           {selectedCustomer && (
             <div className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm" data-testid="usage-summary">
