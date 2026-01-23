@@ -1017,3 +1017,131 @@ async def mark_invoice_paid(invoice_id: str, payment_id: Optional[str] = None, r
     }
 
 # Include the router in the main app
+
+# =============== ANALYTICS ROUTES (MUST BE BEFORE app.include_router) ===============
+
+@api_router.get("/analytics/overview")
+async def get_analytics_overview(request: Request):
+    user = require_auth(await get_current_user(request))
+    
+    total_customers = await db.customers.count_documents({})
+    total_subscriptions = await db.subscriptions.count_documents({"status": "active"})
+    
+    subscriptions = await db.subscriptions.find({"status": "active"}, {"_id": 0}).to_list(1000)
+    total_mrr = sum(sub.get("mrr", 0) for sub in subscriptions)
+    
+    invoices = await db.invoices.find({}, {"_id": 0}).to_list(1000)
+    total_revenue = sum(inv.get("amount", 0) for inv in invoices if inv.get("status") == "paid")
+    pending_revenue = sum(inv.get("amount", 0) for inv in invoices if inv.get("status") == "pending")
+    
+    expenses = await db.expenses.find({}, {"_id": 0}).to_list(1000)
+    total_expenses = sum(exp.get("amount", 0) for exp in expenses)
+    
+    return {
+        "total_customers": total_customers,
+        "total_subscriptions": total_subscriptions,
+        "total_mrr": total_mrr,
+        "total_revenue": total_revenue,
+        "pending_revenue": pending_revenue,
+        "total_expenses": total_expenses,
+        "net_profit": total_revenue - total_expenses
+    }
+
+@api_router.get("/analytics/revenue-chart")
+async def get_revenue_chart(request: Request):
+    user = require_auth(await get_current_user(request))
+    
+    invoices = await db.invoices.find({"status": "paid"}, {"_id": 0}).to_list(1000)
+    
+    revenue_by_month = {}
+    for invoice in invoices:
+        created_at = invoice.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at)
+        
+        month_key = created_at.strftime("%Y-%m")
+        revenue_by_month[month_key] = revenue_by_month.get(month_key, 0) + invoice.get("amount", 0)
+    
+    chart_data = [{"month": k, "revenue": v} for k, v in sorted(revenue_by_month.items())]
+    
+    return chart_data
+
+@api_router.get("/reminders/check-pending-invoices")
+async def check_pending_invoices(request: Request):
+    user = require_auth(await get_current_user(request))
+    require_role(user, ["admin", "finance_team"])
+    
+    now = datetime.now(timezone.utc)
+    
+    overdue_invoices = await db.invoices.find({
+        "status": {"$in": ["pending", "partially_paid"]},
+        "due_date": {"$lt": now.isoformat()}
+    }, {"_id": 0}).to_list(1000)
+    
+    actions_needed = []
+    
+    for invoice in overdue_invoices:
+        customer = await db.customers.find_one(
+            {"customer_id": invoice["customer_id"]},
+            {"_id": 0}
+        )
+        
+        if not customer:
+            continue
+        
+        due_date = datetime.fromisoformat(invoice["due_date"])
+        days_overdue = (now - due_date).days
+        
+        remaining_amount = invoice["amount"] - invoice.get("paid_amount", 0)
+        
+        action = {
+            "customer_id": invoice["customer_id"],
+            "customer_name": customer["name"],
+            "invoice_id": invoice["invoice_id"],
+            "amount_due": remaining_amount,
+            "days_overdue": days_overdue,
+            "account_status": customer.get("account_status", "active")
+        }
+        
+        if days_overdue >= 30 and customer.get("account_status") != "shutdown":
+            action["recommended_action"] = "shutdown_account"
+            action["reason"] = f"Payment overdue by {days_overdue} days"
+        elif days_overdue >= 15 and customer.get("account_status") == "active":
+            action["recommended_action"] = "suspend_account"
+            action["reason"] = f"Payment overdue by {days_overdue} days"
+        elif days_overdue >= 7:
+            action["recommended_action"] = "send_final_reminder"
+        elif days_overdue >= 3:
+            action["recommended_action"] = "send_reminder"
+        else:
+            action["recommended_action"] = "monitor"
+        
+        actions_needed.append(action)
+    
+    return {
+        "total_overdue": len(overdue_invoices),
+        "actions_needed": actions_needed,
+        "checked_at": now.isoformat()
+    }
+
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
+
