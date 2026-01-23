@@ -344,6 +344,120 @@ function Customers({ user }) {
           </div>
         </div>
       )}
+
+      {/* Customer Details Modal */}
+      {showDetailsModal && selectedCustomer && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="details-modal">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'Work Sans, sans-serif', color: '#064E3B' }}>
+              Customer Details
+            </h2>
+            
+            <div className="space-y-6">
+              <div className="p-4 rounded-lg border border-slate-200">
+                <h3 className="font-semibold mb-3" style={{ fontFamily: 'Work Sans, sans-serif', color: '#064E3B' }}>Basic Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-600 mb-1" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Name</p>
+                    <p className="font-medium" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{selectedCustomer.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 mb-1" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Email</p>
+                    <p className="font-medium" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{selectedCustomer.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 mb-1" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Company</p>
+                    <p className="font-medium" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{selectedCustomer.company || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 mb-1" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>Phone</p>
+                    <p className="font-medium" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{selectedCustomer.phone || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg border border-slate-200">
+                <h3 className="font-semibold mb-3" style={{ fontFamily: 'Work Sans, sans-serif', color: '#064E3B' }}>Permissions & Access</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(permissionLabels).map(([key, label]) => (
+                    <div key={key} className="flex items-center gap-2 p-2 rounded" style={{ backgroundColor: selectedCustomer.permissions[key] ? '#D9F99D20' : '#F8FAFC' }}>
+                      {selectedCustomer.permissions[key] ? (
+                        <Check size={20} className="text-green-600" />
+                      ) : (
+                        <X size={20} className="text-slate-400" />
+                      )}
+                      <span className="text-sm" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedCustomer.rate_card && Object.keys(selectedCustomer.rate_card).length > 0 && (
+                <div className="p-4 rounded-lg border border-slate-200">
+                  <h3 className="font-semibold mb-3" style={{ fontFamily: 'Work Sans, sans-serif', color: '#064E3B' }}>Rate Card</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {Object.entries(selectedCustomer.rate_card).map(([service, rate]) => (
+                      <div key={service} className="flex justify-between p-2 rounded" style={{ backgroundColor: '#F8FAFC' }}>
+                        <span className="text-sm capitalize" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>{service.replace('_', ' ')}</span>
+                        <span className="text-sm font-semibold" style={{ fontFamily: 'IBM Plex Sans, sans-serif', color: '#064E3B' }}>₹{rate}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedCustomer.bundles && selectedCustomer.bundles.length > 0 && (
+                <div className="p-4 rounded-lg border border-slate-200">
+                  <h3 className="font-semibold mb-3" style={{ fontFamily: 'Work Sans, sans-serif', color: '#064E3B' }}>Subscribed Bundles</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCustomer.bundles.map(bundle => (
+                      <span key={bundle} className="px-3 py-1 rounded-md text-sm" style={{ backgroundColor: '#064E3B', color: 'white', fontFamily: 'IBM Plex Sans, sans-serif' }}>
+                        {bundle.toUpperCase().replace('_', ' + ')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="p-4 rounded-lg border border-slate-200">
+                <h3 className="font-semibold mb-3" style={{ fontFamily: 'Work Sans, sans-serif', color: '#064E3B' }}>Account Status</h3>
+                <span className={`px-4 py-2 rounded-md font-medium ${
+                  selectedCustomer.account_status === 'active' ? 'bg-green-100 text-green-700' :
+                  selectedCustomer.account_status === 'suspended' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-red-100 text-red-700'
+                }`} style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>
+                  {(selectedCustomer.account_status || 'active').toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              {(user?.role === "admin" || user?.role === "sales") && (
+                <button
+                  onClick={() => {
+                    handleEdit(selectedCustomer);
+                    setShowDetailsModal(false);
+                  }}
+                  className="px-6 py-2 rounded-md font-medium text-white"
+                  style={{ backgroundColor: '#064E3B', fontFamily: 'IBM Plex Sans, sans-serif' }}
+                >
+                  Edit Customer
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setSelectedCustomer(null);
+                }}
+                className="px-6 py-2 rounded-md font-medium border border-slate-200 hover:bg-slate-50"
+                style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
