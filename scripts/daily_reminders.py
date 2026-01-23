@@ -17,46 +17,45 @@ from datetime import datetime
 # Add backend directory to path
 sys.path.insert(0, '/app/backend')
 
-# Configuration
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001')
+# Configuration - use external URL for API calls
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://fintrack-693.preview.emergentagent.com')
 API_URL = f"{BACKEND_URL}/api"
 
 # Admin credentials (should be stored securely in production)
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@finance.com')
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@test.com')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Test123!')
 
 def log(message):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{timestamp}] {message}")
 
 def login():
-    """Authenticate and get session token"""
+    """Authenticate and get session cookie"""
     try:
-        response = requests.post(
+        session = requests.Session()
+        response = session.post(
             f"{API_URL}/auth/login",
             json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD}
         )
         response.raise_for_status()
         data = response.json()
-        return data.get('session_token')
+        # Return the session with cookies set
+        return session, data.get('session_token')
     except Exception as e:
         log(f"Login failed: {e}")
-        return None
+        return None, None
 
-def check_reminders(session_token):
+def check_reminders(session):
     """Check for pending invoices and get recommended actions"""
     try:
-        response = requests.get(
-            f"{API_URL}/reminders/check-pending-invoices",
-            headers={"Authorization": f"Bearer {session_token}"}
-        )
+        response = session.get(f"{API_URL}/reminders/check-pending-invoices")
         response.raise_for_status()
         return response.json()
     except Exception as e:
         log(f"Failed to check reminders: {e}")
         return None
 
-def process_actions(actions, session_token):
+def process_actions(actions, session):
     """Process recommended actions"""
     for action in actions:
         customer_id = action['customer_id']
@@ -65,49 +64,43 @@ def process_actions(actions, session_token):
         log(f"Customer: {action['customer_name']} - {recommended}")
         
         if recommended == 'shutdown_account':
-            # TODO: Add actual shutdown logic
             log(f"  → Would shutdown account for {customer_id}")
             # Uncomment to enable:
-            # requests.post(
+            # session.post(
             #     f"{API_URL}/customers/{customer_id}/shutdown-account",
-            #     params={"reason": action['reason']},
-            #     headers={"Authorization": f"Bearer {session_token}"}
+            #     params={"reason": action['reason']}
             # )
             
         elif recommended == 'suspend_account':
-            # TODO: Add actual suspension logic
             log(f"  → Would suspend account for {customer_id}")
             # Uncomment to enable:
-            # requests.post(
+            # session.post(
             #     f"{API_URL}/customers/{customer_id}/suspend-account",
-            #     params={"reason": action['reason']},
-            #     headers={"Authorization": f"Bearer {session_token}"}
+            #     params={"reason": action['reason']}
             # )
             
         elif recommended in ['send_reminder', 'send_final_reminder', 'send_low_balance_alert']:
-            # TODO: Integrate with email service (AWS SES)
             log(f"  → Would send email: {recommended}")
             # Uncomment to enable:
-            # requests.post(
+            # session.post(
             #     f"{API_URL}/receivables/send-payment-email",
-            #     params={"invoice_id": action['invoice_id']},
-            #     headers={"Authorization": f"Bearer {session_token}"}
+            #     params={"invoice_id": action['invoice_id']}
             # )
 
 def main():
     log("Starting daily reminders check...")
     
     # Login
-    session_token = login()
-    if not session_token:
+    session, token = login()
+    if not session or not token:
         log("ERROR: Authentication failed. Exiting.")
         sys.exit(1)
     
-    log("Authentication successful")
+    log(f"Authentication successful (token: {token[:20]}...)")
     
     # Check reminders
-    result = check_reminders(session_token)
-    if not result:
+    result = check_reminders(session)
+    if result is None:
         log("ERROR: Failed to fetch reminders")
         sys.exit(1)
     
@@ -118,7 +111,7 @@ def main():
     log(f"Actions needed: {len(actions)}")
     
     if actions:
-        process_actions(actions, session_token)
+        process_actions(actions, session)
     else:
         log("No actions needed today")
     
