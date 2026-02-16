@@ -1,0 +1,149 @@
+{
+  "marketplace_name": "Amazon",
+  "marketplace_id": "amazon_us",
+  "categories": [
+    {
+      "category_id": "amazon_electronics",
+      "category_name": "Electronics",
+      "category_path": "Electronics",
+      "attributes": [
+        {
+          "attribute_id": "amazon_brand",
+          "attribute_name": "Brand",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "Samsung", "value_id": "samsung"},
+            {"value": "Apple", "value_id": "apple"},
+            {"value": "Sony", "value_id": "sony"},
+            {"value": "LG", "value_id": "lg"},
+            {"value": "Dell", "value_id": "dell"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_color",
+          "attribute_name": "Color",
+          "attribute_type": "string",
+          "required": false,
+          "list_of_values": [
+            {"value": "Black", "value_id": "black"},
+            {"value": "White", "value_id": "white"},
+            {"value": "Silver", "value_id": "silver"},
+            {"value": "Space Gray", "value_id": "space_gray"},
+            {"value": "Gold", "value_id": "gold"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_warranty",
+          "attribute_name": "Warranty Period",
+          "attribute_type": "string",
+          "required": false,
+          "list_of_values": [
+            {"value": "1 Year", "value_id": "1year"},
+            {"value": "2 Years", "value_id": "2years"},
+            {"value": "No Warranty", "value_id": "no_warranty"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_condition",
+          "attribute_name": "Condition",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "New", "value_id": "new"},
+            {"value": "Refurbished", "value_id": "refurbished"},
+            {"value": "Used - Like New", "value_id": "used_like_new"}
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "amazon_smartphones",
+      "category_name": "Smartphones & Accessories",
+      "category_path": "Electronics > Smartphones & Accessories",
+      "attributes": [
+        {
+          "attribute_id": "amazon_phone_brand",
+          "attribute_name": "Brand",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "Apple", "value_id": "apple"},
+            {"value": "Samsung", "value_id": "samsung"},
+            {"value": "Google", "value_id": "google"},
+            {"value": "OnePlus", "value_id": "oneplus"},
+            {"value": "Xiaomi", "value_id": "xiaomi"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_storage",
+          "attribute_name": "Storage Capacity",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "64GB", "value_id": "64gb"},
+            {"value": "128GB", "value_id": "128gb"},
+            {"value": "256GB", "value_id": "256gb"},
+            {"value": "512GB", "value_id": "512gb"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_ram",
+          "attribute_name": "RAM",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "4GB", "value_id": "4gb"},
+            {"value": "6GB", "value_id": "6gb"},
+            {"value": "8GB", "value_id": "8gb"},
+            {"value": "12GB", "value_id": "12gb"}
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "amazon_clothing",
+      "category_name": "Clothing & Fashion",
+      "category_path": "Clothing, Shoes & Jewelry > Clothing",
+      "attributes": [
+        {
+          "attribute_id": "amazon_size",
+          "attribute_name": "Size",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "XS", "value_id": "xs"},
+            {"value": "S", "value_id": "s"},
+            {"value": "M", "value_id": "m"},
+            {"value": "L", "value_id": "l"},
+            {"value": "XL", "value_id": "xl"},
+            {"value": "XXL", "value_id": "xxl"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_fabric",
+          "attribute_name": "Material Type",
+          "attribute_type": "string",
+          "required": false,
+          "list_of_values": [
+            {"value": "Cotton", "value_id": "cotton"},
+            {"value": "Polyester", "value_id": "polyester"},
+            {"value": "Cotton Blend", "value_id": "cotton_blend"},
+            {"value": "Silk", "value_id": "silk"}
+          ]
+        },
+        {
+          "attribute_id": "amazon_gender",
+          "attribute_name": "Department",
+          "attribute_type": "string",
+          "required": true,
+          "list_of_values": [
+            {"value": "Men", "value_id": "men"},
+            {"value": "Women", "value_id": "women"},
+            {"value": "Unisex", "value_id": "unisex"}
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "category_matches": [
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1": {
+        "id": "amazon_electronics",
+        "name": "Electronics",
+        "path": "Electronics"
+      },
+      "category2": {
+        "id": "flipkart_electronics",
+        "name": "Electronic Devices",
+        "path": "Electronic Devices"
+      },
+      "similarity_score": 0.759,
+      "match_type": "category"
+    }
+  ],
+  "attribute_matches": [
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1": {
+        "id": "amazon_color",
+        "name": "Color",
+        "type": "string",
+        "required": false
+      },
+      "attribute2": {
+        "id": "flipkart_colour",
+        "name": "Colour",
+        "type": "text",
+        "required": false
+      },
+      "similarity_score": 0.909,
+      "match_type": "attribute"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1": {
+        "id": "amazon_warranty",
+        "name": "Warranty Period",
+        "type": "string",
+        "required": false
+      },
+      "attribute2": {
+        "id": "flipkart_warranty_period",
+        "name": "Warranty Duration",
+        "type": "text",
+        "required": false
+      },
+      "similarity_score": 0.75,
+      "match_type": "attribute"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1": {
+        "id": "amazon_condition",
+        "name": "Condition",
+        "type": "string",
+        "required": true
+      },
+      "attribute2": {
+        "id": "flipkart_product_condition",
+        "name": "Product Condition",
+        "type": "text",
+        "required": true
+      },
+      "similarity_score": 0.692,
+      "match_type": "attribute"
+    }
+  ],
+  "lov_matches": [
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Color",
+      "attribute2_name": "Colour",
+      "value1": {
+        "value": "Black",
+        "value_id": "black"
+      },
+      "value2": {
+        "value": "Black",
+        "value_id": "blk"
+      },
+      "similarity_score": 1.0,
+      "match_type": "list_of_values"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Color",
+      "attribute2_name": "Colour",
+      "value1": {
+        "value": "White",
+        "value_id": "white"
+      },
+      "value2": {
+        "value": "White",
+        "value_id": "wht"
+      },
+      "similarity_score": 1.0,
+      "match_type": "list_of_values"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Color",
+      "attribute2_name": "Colour",
+      "value1": {
+        "value": "Silver",
+        "value_id": "silver"
+      },
+      "value2": {
+        "value": "Silver",
+        "value_id": "slvr"
+      },
+      "similarity_score": 1.0,
+      "match_type": "list_of_values"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Color",
+      "attribute2_name": "Colour",
+      "value1": {
+        "value": "Gold",
+        "value_id": "gold"
+      },
+      "value2": {
+        "value": "Golden",
+        "value_id": "gld"
+      },
+      "similarity_score": 0.8,
+      "match_type": "list_of_values"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Warranty Period",
+      "attribute2_name": "Warranty Duration",
+      "value1": {
+        "value": "No Warranty",
+        "value_id": "no_warranty"
+      },
+      "value2": {
+        "value": "No Warranty",
+        "value_id": "none"
+      },
+      "similarity_score": 1.0,
+      "match_type": "list_of_values"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Condition",
+      "attribute2_name": "Product Condition",
+      "value1": {
+        "value": "New",
+        "value_id": "new"
+      },
+      "value2": {
+        "value": "Brand New",
+        "value_id": "brand_new"
+      },
+      "similarity_score": 1.0,
+      "match_type": "list_of_values"
+    },
+    {
+      "marketplace1": "Amazon",
+      "marketplace2": "Flipkart",
+      "category1_name": "Electronics",
+      "category2_name": "Electronic Devices",
+      "attribute1_name": "Condition",
+      "attribute2_name": "Product Condition",
+      "value1": {
+        "value": "Refurbished",
+        "value_id": "refurbished"
+      },
+      "value2": {
+        "value": "Refurbished",
+        "value_id": "refurb"
+      },
+      "similarity_score": 1.0,
+      "match_type": "list_of_values"
+    }
+  ],
+  "summary": {
+    "total_category_matches": 1,
+    "total_attribute_matches": 3,
+    "total_lov_matches": 7
+  }
+}

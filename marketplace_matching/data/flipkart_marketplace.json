@@ -1,0 +1,149 @@
+{
+  "marketplace_name": "Flipkart",
+  "marketplace_id": "flipkart_in",
+  "categories": [
+    {
+      "category_id": "flipkart_electronics",
+      "category_name": "Electronic Devices",
+      "category_path": "Electronic Devices",
+      "attributes": [
+        {
+          "attribute_id": "flipkart_manufacturer",
+          "attribute_name": "Manufacturer",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "Samsung", "value_id": "samsung_brand"},
+            {"value": "Apple Inc.", "value_id": "apple_inc"},
+            {"value": "Sony Corporation", "value_id": "sony_corp"},
+            {"value": "LG Electronics", "value_id": "lg_elec"},
+            {"value": "Dell Technologies", "value_id": "dell_tech"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_colour",
+          "attribute_name": "Colour",
+          "attribute_type": "text",
+          "required": false,
+          "list_of_values": [
+            {"value": "Black", "value_id": "blk"},
+            {"value": "White", "value_id": "wht"},
+            {"value": "Silver", "value_id": "slvr"},
+            {"value": "Grey", "value_id": "grey"},
+            {"value": "Golden", "value_id": "gld"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_warranty_period",
+          "attribute_name": "Warranty Duration",
+          "attribute_type": "text",
+          "required": false,
+          "list_of_values": [
+            {"value": "12 Months", "value_id": "12m"},
+            {"value": "24 Months", "value_id": "24m"},
+            {"value": "No Warranty", "value_id": "none"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_product_condition",
+          "attribute_name": "Product Condition",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "Brand New", "value_id": "brand_new"},
+            {"value": "Refurbished", "value_id": "refurb"},
+            {"value": "Open Box", "value_id": "open_box"}
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "flipkart_mobiles",
+      "category_name": "Mobile Phones",
+      "category_path": "Mobiles & Accessories > Mobile Phones",
+      "attributes": [
+        {
+          "attribute_id": "flipkart_mobile_brand",
+          "attribute_name": "Mobile Brand",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "Apple Inc.", "value_id": "apple_inc"},
+            {"value": "Samsung", "value_id": "samsung_brand"},
+            {"value": "Google Pixel", "value_id": "google_pixel"},
+            {"value": "OnePlus", "value_id": "oneplus_brand"},
+            {"value": "Xiaomi India", "value_id": "xiaomi_india"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_internal_storage",
+          "attribute_name": "Internal Storage",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "64 GB", "value_id": "64_gb"},
+            {"value": "128 GB", "value_id": "128_gb"},
+            {"value": "256 GB", "value_id": "256_gb"},
+            {"value": "512 GB", "value_id": "512_gb"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_memory",
+          "attribute_name": "RAM Memory",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "4 GB", "value_id": "4_gb"},
+            {"value": "6 GB", "value_id": "6_gb"},
+            {"value": "8 GB", "value_id": "8_gb"},
+            {"value": "12 GB", "value_id": "12_gb"}
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "flipkart_fashion",
+      "category_name": "Fashion & Apparel",
+      "category_path": "Fashion > Clothing",
+      "attributes": [
+        {
+          "attribute_id": "flipkart_apparel_size",
+          "attribute_name": "Apparel Size",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "Extra Small", "value_id": "extra_small"},
+            {"value": "Small", "value_id": "small"},
+            {"value": "Medium", "value_id": "medium"},
+            {"value": "Large", "value_id": "large"},
+            {"value": "Extra Large", "value_id": "extra_large"},
+            {"value": "XXL", "value_id": "double_xl"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_material",
+          "attribute_name": "Fabric Material",
+          "attribute_type": "text",
+          "required": false,
+          "list_of_values": [
+            {"value": "100% Cotton", "value_id": "pure_cotton"},
+            {"value": "Polyester", "value_id": "poly"},
+            {"value": "Cotton Blend", "value_id": "cotton_mix"},
+            {"value": "Pure Silk", "value_id": "pure_silk"}
+          ]
+        },
+        {
+          "attribute_id": "flipkart_ideal_for",
+          "attribute_name": "Ideal For",
+          "attribute_type": "text",
+          "required": true,
+          "list_of_values": [
+            {"value": "Men", "value_id": "male"},
+            {"value": "Women", "value_id": "female"},
+            {"value": "Unisex", "value_id": "both"}
+          ]
+        }
+      ]
+    }
+  ]
+}

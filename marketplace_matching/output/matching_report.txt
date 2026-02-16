@@ -1,0 +1,54 @@
+================================================================================
+MARKETPLACE DATA MATCHING REPORT
+================================================================================
+
+SUMMARY:
+  Total Category Matches: 1
+  Total Attribute Matches: 3
+  Total LOV Matches: 7
+
+--------------------------------------------------------------------------------
+CATEGORY MATCHES:
+--------------------------------------------------------------------------------
+
+Match Score: 0.759
+  Amazon: Electronics
+  Flipkart: Electronic Devices
+
+--------------------------------------------------------------------------------
+ATTRIBUTE MATCHES:
+--------------------------------------------------------------------------------
+
+Match Score: 0.909
+  Category: Electronics <-> Electronic Devices
+  Amazon: Color (Required: False)
+  Flipkart: Colour (Required: False)
+
+Match Score: 0.75
+  Category: Electronics <-> Electronic Devices
+  Amazon: Warranty Period (Required: False)
+  Flipkart: Warranty Duration (Required: False)
+
+Match Score: 0.692
+  Category: Electronics <-> Electronic Devices
+  Amazon: Condition (Required: True)
+  Flipkart: Product Condition (Required: True)
+
+--------------------------------------------------------------------------------
+LIST OF VALUES MATCHES:
+--------------------------------------------------------------------------------
+
+Attribute: Color <-> Colour
+  Score 1.0: Black <-> Black
+  Score 1.0: White <-> White
+  Score 1.0: Silver <-> Silver
+  Score 0.8: Gold <-> Golden
+
+Attribute: Warranty Period <-> Warranty Duration
+  Score 1.0: No Warranty <-> No Warranty
+
+Attribute: Condition <-> Product Condition
+  Score 1.0: New <-> Brand New
+  Score 1.0: Refurbished <-> Refurbished
+
+================================================================================
