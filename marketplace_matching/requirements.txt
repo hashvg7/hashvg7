@@ -1,0 +1,15 @@
+# Marketplace Matching System Requirements
+# This project uses only Python standard library
+# No external dependencies required
+
+# Python version: 3.6+
+# Standard library modules used:
+# - json
+# - difflib
+# - typing
+# - collections
+
+# Optional: For development and testing
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
